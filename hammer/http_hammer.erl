@@ -21,12 +21,10 @@ request(Url, Callback) ->
   end,
   request(Url, Callback).
 
-spawn_hammer(_Url, 0, _Interval) -> done;
-spawn_hammer(Url, Number, Interval) ->
-  Statistics = spawn(fun() -> statistics(0, 0) end),
+spawn_hammer(_Url, 0, _Statistics) -> done;
+spawn_hammer(Url, Number, Statistics) ->
   spawn(fun() -> request(Url, Statistics) end),
-  hammer(Url, Number - 1),
-  spawn(fun() -> print_statistics(Statistics, Interval) end).
+  hammer(Url, Number - 1).
 
 print_statistics(Statistics, Interval) ->
   receive
@@ -45,4 +43,8 @@ setup() ->
   inets:start().
 
 hammer(Url, Number) -> hammer(Url, Number, infinity).
-hammer(Url, Number, Interval) -> setup(), spawn_hammer(Url, Number, Interval).
+hammer(Url, Number, Interval) ->
+  setup(),
+  Statistics = spawn(fun() -> statistics(0, 0) end),
+  _Printer = spawn(fun() -> print_statistics(Statistics, Interval) end),
+  spawn_hammer(Url, Number, Statistics).
