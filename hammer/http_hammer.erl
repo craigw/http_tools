@@ -24,7 +24,7 @@ request(Url, Callback) ->
 spawn_hammer(_Url, 0, _Statistics) -> done;
 spawn_hammer(Url, Number, Statistics) ->
   spawn(fun() -> request(Url, Statistics) end),
-  hammer(Url, Number - 1).
+  spawn_hammer(Url, Number - 1, Statistics).
 
 print_statistics(Statistics, Interval) ->
   receive
